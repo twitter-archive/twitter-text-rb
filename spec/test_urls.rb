@@ -1,7 +1,7 @@
 module TestUrls
   VALID = [
     "http://google.com",
-    "http://foobar.com/#",
+    "http://google.com/#",
     "http://google.com/#foo",
     "http://google.com/#search?q=iphone%20-filter%3Alinks",
     "http://twitter.com/#search?q=iphone%20-filter%3Alinks",
@@ -31,10 +31,11 @@ module TestUrls
 
   EMBED_TEXT = [
     "I enjoy a good URL now and again: <%= url %>",
-    "I'll just drop one <%= url %> right in the middle of a conversation.",
-    "Sometimes I put them in parens (<%= url %>) for fun",
-    "Finding spaces after colons disagreeable, I show them to my friend @mzsanford:<%= url %>",
-    "いまなにしてる<%= url %>いまなにしてる",
+    "I'll just drop a <%= url %> right in the middle of a sentence.",
+    "I think it's proper to end sentences with a period <%= url %>. Even when they contain a URL.",
+    "Sometimes I'll wrap one in parens (<%= url %>) as an aside.",
+    "A colon with no spaces is a great way to address my friend @mzsanford:<%= url %>",
+    "There are no spaces between characters in Japanese:  いまなにしてる<%= url %>いまなにしてる",
   ]
 
 end

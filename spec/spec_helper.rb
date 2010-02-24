@@ -40,7 +40,7 @@ Spec::Matchers.define :have_autolinked_url do |url|
     if !@link
       "Expected to find '#{url}' autolinked in '#{text}', but it was not"
     elsif @link && @link.inner_text != url
-      "Expected anchor tag's inner_text '#{@link.inner_text}' to match #{url}"
+      "Expected anchor tag's inner_text '#{@link.inner_text}' to match '#{url}'"
     end
   end
 end

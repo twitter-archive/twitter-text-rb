@@ -311,21 +311,7 @@ describe Twitter::Autolink do
     end
 
     describe "URL autolinking" do
-
-      # Run through every permutation of a valid URL and how it might be embedded in text:
-      TestUrls::EMBED_TEXT.each do |text|
-        TestUrls::VALID.each do |url|
-          it "should link the URL #{url} when embedded in '#{text}'" do
-            text_with_embedded_url = ERB.new(text).result(binding)
-            autolinked_text = TestAutolink.new.auto_link(text_with_embedded_url)
-
-            autolinked_text.should have_autolinked_url(url)
-          end
-        end
-      end
-
-
-      def url; "http://www.google.com/?s=veritas"; end
+      def url; "http://www.google.com"; end
 
       context "when embedded in plain text" do
         def original_text; "On my search engine #{url} I found good links."; end
@@ -350,11 +336,10 @@ describe Twitter::Autolink do
           @autolinked_text.should have_autolinked_url(url)
         end
 
-        context "when the URL ends with a slash;" do
-          def url; "http://www.google.com/"; end
+        context "when the URL has a path;" do
+          def url; "http://www.google.com/search?q=veritas"; end
 
           it "should be linked" do
-            pending # our support for Wikipedia URLS containing parens breaks this corner case
             @autolinked_text.should have_autolinked_url(url)
           end
         end
@@ -431,6 +416,21 @@ describe Twitter::Autolink do
           link = Hpricot(@autolinked_text).at('a')
           link.inner_text.should == 'www.foobar.com'
           link['href'].should == 'http://www.foobar.com'
+        end
+      end
+
+      context "permutation testing; " do
+        TestUrls::EMBED_TEXT.each do |text|
+          TestUrls::VALID.each do |url|
+
+            it "should link the URL #{url} when embedded in '#{text}'" do
+              text_with_embedded_url = ERB.new(text).result(binding)
+              autolinked_text = TestAutolink.new.auto_link(text_with_embedded_url)
+
+              autolinked_text.should have_autolinked_url(url)
+            end
+
+          end
         end
       end
 
