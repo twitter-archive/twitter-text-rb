@@ -16,7 +16,9 @@ module TestUrls
     "http://tell.me/why",
     "http://longtlds.info",
     "http://✪df.ws/ejp",
-    "http://日本.com"
+    "http://日本.com",
+    # "http://www.flickr.com/photos/29674651@N00/4382024406",
+    # "http://www.flickr.com/photos/29674651@N00/foobar",
   ]
 
   INVALID = [ 
@@ -25,6 +27,14 @@ module TestUrls
     "http://x.com/,,,/.../@@@/;;;/:::/---/%%%x",
     "http://domain-dash.com",
     "http://-doman_dash.com"
+  ]
+
+  EMBED_TEXT = [
+    "I enjoy a good URL now and again: <%= url %>",
+    "I'll just drop one <%= url %> right in the middle of a conversation.",
+    "Sometimes I put them in parens (<%= url %>) for fun",
+    "Finding spaces after colons disagreeable, I show them to my friend @mzsanford:<%= url %>",
+    "いまなにしてる<%= url %>いまなにしてる",
   ]
 
 end

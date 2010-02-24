@@ -22,20 +22,26 @@ Spec::Matchers.define :match_autolink_expression_in do |text|
   end
 
   failure_message_for_should do |url|
-    "Expected to find url '#{url}' in text '#{text}', but the match was #{@match_data.captures}'"
+    "Expected to match url '#{url}' in text '#{text}', but the match returned #{@match_data.captures}'"
   end
 end
 
 Spec::Matchers.define :have_autolinked_url do |url|
   match do |text|
-    @link = Hpricot(text).at("a[@href='#{url}']")
+    # @link = Hpricot(text).at("a[@href='#{url}']")
+    #find the first non-username anchor tag - could fail if text contains several anchors
+    @link = Hpricot(text).at('a:not(.username)')
     @link &&
     @link.inner_text &&
     @link.inner_text == url
   end
 
   failure_message_for_should do |text|
-    "Expected url '#{url}' to be autolinked in '#{text}'"
+    if !@link
+      "Expected to find '#{url}' autolinked in '#{text}', but it was not"
+    elsif @link && @link.inner_text != url
+      "Expected anchor tag's inner_text '#{@link.inner_text}' to match #{url}"
+    end
   end
 end
 

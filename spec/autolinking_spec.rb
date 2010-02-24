@@ -311,7 +311,21 @@ describe Twitter::Autolink do
     end
 
     describe "URL autolinking" do
-      def url; "http://www.google.com"; end
+
+      # Run through every permutation of a valid URL and how it might be embedded in text:
+      TestUrls::EMBED_TEXT.each do |text|
+        TestUrls::VALID.each do |url|
+          it "should link the URL #{url} when embedded in '#{text}'" do
+            text_with_embedded_url = ERB.new(text).result(binding)
+            autolinked_text = TestAutolink.new.auto_link(text_with_embedded_url)
+
+            autolinked_text.should have_autolinked_url(url)
+          end
+        end
+      end
+
+
+      def url; "http://www.google.com/?s=veritas"; end
 
       context "when embedded in plain text" do
         def original_text; "On my search engine #{url} I found good links."; end
@@ -381,21 +395,24 @@ describe Twitter::Autolink do
       end
 
       context "with multiple URLs" do
-        def original_text; "http://www.links.org link at start of page, link at end http://www.foo.org"; end
+        def original_text; "http://www.links.org link at start of page AND link at end http://www.foo.org"; end
 
         it "should autolink each one" do
-          @autolinked_text.should have_autolinked_url('http://www.links.org')
-          @autolinked_text.should have_autolinked_url('http://www.foo.org')
+          split_text = @autolinked_text.split('AND')
+          split_text[0].should have_autolinked_url('http://www.links.org')
+          split_text[1].should have_autolinked_url('http://www.foo.org')
         end
       end
 
       context "with multiple URLs in different formats" do
-        def original_text; "http://foo.com https://bar.com http://mail.foobar.org"; end
+        def original_text; "http://foo.com AND https://bar.com AND www.foobar.com"; end
 
         it "should autolink each one, in the proper order" do
-          @autolinked_text.should have_autolinked_url('http://foo.com')
-          @autolinked_text.should have_autolinked_url('https://bar.com')
-          @autolinked_text.should have_autolinked_url('http://mail.foobar.org')
+          split_text = @autolinked_text.split('AND')
+          puts @autolinked_text
+          split_text[0].should have_autolinked_url('http://foo.com')
+          split_text[1].should have_autolinked_url('https://bar.com')
+          split_text[2].should have_autolinked_url('http://mail.foobar.org')
         end
       end
 
