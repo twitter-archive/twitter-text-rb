@@ -17,8 +17,8 @@ module TestUrls
     "http://longtlds.info",
     "http://✪df.ws/ejp",
     "http://日本.com",
-    # "http://www.flickr.com/photos/29674651@N00/4382024406",
-    # "http://www.flickr.com/photos/29674651@N00/foobar",
+    "http://www.flickr.com/photos/29674651@N00/4382024406",
+    "http://www.flickr.com/photos/29674651@N00/foobar",
   ]
 
   INVALID = [ 
