@@ -21,7 +21,7 @@ module TestUrls
     "http://www.flickr.com/photos/29674651@N00/foobar",
   ]
 
-  INVALID = [ 
+  INVALID = [
     "http://no-tld",
     "http://tld-too-short.x",
     "http://x.com/,,,/.../@@@/;;;/:::/---/%%%x",
