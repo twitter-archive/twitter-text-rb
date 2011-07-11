@@ -1,7 +1,11 @@
 require 'test/unit'
 require 'yaml'
-$KCODE = 'UTF8'
-require File.dirname(__FILE__) + '/../lib/twitter-text'
+
+major, minor, patch = RUBY_VERSION.split('.')
+if major.to_i == 1 && minor.to_i < 9
+  $KCODE='u'
+end
+require 'twitter-text'
 
 class ConformanceTest < Test::Unit::TestCase
   include Twitter::Extractor
