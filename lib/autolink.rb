@@ -20,7 +20,7 @@ module Twitter
     OPTIONS_NOT_ATTRIBUTES = [:url_class, :list_class, :username_class, :hashtag_class,
                               :username_url_base, :list_url_base, :hashtag_url_base,
                               :username_url_block, :list_url_block, :hashtag_url_block, :link_url_block,
-                              :suppress_lists, :suppress_no_follow, :url_entities]
+                              :suppress_lists, :suppress_no_follow, :url_entities, :extra_html_attrs]
 
     HTML_ENTITIES = {
       '&' => '&amp;',
@@ -50,12 +50,12 @@ module Twitter
     # <tt>:suppress_lists</tt>::    disable auto-linking to lists
     # <tt>:suppress_no_follow</tt>::   Do not add <tt>rel="nofollow"</tt> to auto-linked items
     # <tt>:target</tt>::   add <tt>target="window_name"</tt> to auto-linked items
-    def auto_link(text, options = {}, html_options = {})
+    def auto_link(text, options = {})
       auto_link_usernames_or_lists(
         auto_link_urls_custom(
-          auto_link_hashtags(text, options, html_options),
-        options, html_options),
-      options, html_options)
+          auto_link_hashtags(text, options),
+        options),
+      options)
     end
 
     # Add <tt><a></a></tt> tags around the usernames and lists in the provided <tt>text</tt>. The
@@ -70,7 +70,7 @@ module Twitter
     # <tt>:suppress_lists</tt>::    disable auto-linking to lists
     # <tt>:suppress_no_follow</tt>::   Do not add <tt>rel="nofollow"</tt> to auto-linked items
     # <tt>:target</tt>::   add <tt>target="window_name"</tt> to auto-linked items
-    def auto_link_usernames_or_lists(text, options = {}, html_options = {}) # :yields: list_or_username
+    def auto_link_usernames_or_lists(text, options = {}) # :yields: list_or_username
       options = options.dup
       options[:url_class] ||= DEFAULT_URL_CLASS
       options[:list_class] ||= DEFAULT_LIST_CLASS
@@ -79,9 +79,10 @@ module Twitter
       options[:list_url_base] ||= "http://twitter.com/"
       options[:target] ||= DEFAULT_TARGET
 
-      html_options.merge!({ :target => options[:target] }) if options[:target]
-      html_options.merge!(HTML_ATTR_NO_FOLLOW) unless options[:suppress_no_follow]
-      extra_html = html_attrs_for_options(html_options)
+      extra_html_attrs = (options[:extra_html_attrs] || {}).dup
+      extra_html_attrs.merge!({ :target => options[:target] }) if options[:target]
+      extra_html_attrs.merge!(HTML_ATTR_NO_FOLLOW) unless options[:suppress_no_follow]
+      extra_html = html_attrs_for_options(extra_html_attrs)
 
       Twitter::Rewriter.rewrite_usernames_or_lists(text) do |at, username, slash_listname|
         name = "#{username}#{slash_listname}"
@@ -114,16 +115,17 @@ module Twitter
     # <tt>:hashtag_url_base</tt>::      the value for <tt>href</tt> attribute. The hashtag text (minus the <tt>#</tt>) will be appended at the end of this.
     # <tt>:suppress_no_follow</tt>::   Do not add <tt>rel="nofollow"</tt> to auto-linked items
     # <tt>:target</tt>::   add <tt>target="window_name"</tt> to auto-linked items
-    def auto_link_hashtags(text, options = {}, html_options = {})  # :yields: hashtag_text
+    def auto_link_hashtags(text, options = {})  # :yields: hashtag_text
       options = options.dup
       options[:url_class] ||= DEFAULT_URL_CLASS
       options[:hashtag_class] ||= DEFAULT_HASHTAG_CLASS
       options[:hashtag_url_base] ||= "http://twitter.com/search?q=%23"
       options[:target] ||= DEFAULT_TARGET
 
-      html_options.merge!({ :target => options[:target] }) if options[:target]
-      html_options.merge!(HTML_ATTR_NO_FOLLOW) unless options[:suppress_no_follow]
-      extra_html = html_attrs_for_options(html_options)
+      extra_html_attrs = (options[:extra_html_attrs] || {}).dup
+      extra_html_attrs.merge!({ :target => options[:target] }) if options[:target]
+      extra_html_attrs.merge!(HTML_ATTR_NO_FOLLOW) unless options[:suppress_no_follow]
+      extra_html = html_attrs_for_options(extra_html_attrs)
 
       Twitter::Rewriter.rewrite_hashtags(text) do |hash, hashtag|
         hashtag = yield(hashtag) if block_given?
@@ -140,7 +142,7 @@ module Twitter
     # elements in the <tt>href_options</tt> hash will be converted to HTML attributes
     # and place in the <tt><a></tt> tag. Unless <tt>href_options</tt> contains <tt>:suppress_no_follow</tt>
     # the <tt>rel="nofollow"</tt> attribute will be added.
-    def auto_link_urls_custom(text, href_options = {}, html_options = {})
+    def auto_link_urls_custom(text, href_options = {})
       options = href_options.dup
       
       url_entities = {}
@@ -152,11 +154,12 @@ module Twitter
         options.delete(:url_entities)
       end
 
-      html_options.merge!(options)
-      html_options.merge!({ :class => options.delete(:url_class) }) if options[:url_class]
-      html_options.merge!({ :target => options[:target] }) if options[:target]
-      html_options.merge!(HTML_ATTR_NO_FOLLOW) unless options[:suppress_no_follow]
-      extra_html = html_attrs_for_options(html_options)
+      extra_html_attrs = (options[:extra_html_attrs] || {}).dup
+      extra_html_attrs.merge!(options)
+      extra_html_attrs.merge!({ :class => options.delete(:url_class) }) if options[:url_class]
+      extra_html_attrs.merge!({ :target => options[:target] }) if options[:target]
+      extra_html_attrs.merge!(HTML_ATTR_NO_FOLLOW) unless options[:suppress_no_follow]
+      extra_html = html_attrs_for_options(extra_html_attrs)
 
       Twitter::Rewriter.rewrite_urls(text) do |url|
         href = if options[:link_url_block]
