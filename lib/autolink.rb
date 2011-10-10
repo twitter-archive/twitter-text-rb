@@ -50,6 +50,7 @@ module Twitter
     # <tt>:suppress_lists</tt>::    disable auto-linking to lists
     # <tt>:suppress_no_follow</tt>::   Do not add <tt>rel="nofollow"</tt> to auto-linked items
     # <tt>:target</tt>::   add <tt>target="window_name"</tt> to auto-linked items
+    # <tt>:extra_html_attrs::   add custom <tt>name="value"</tt> attributes to auto-linked items. Hash key is the attribute name and the Hash value is attribute value</tt>
     def auto_link(text, options = {})
       auto_link_usernames_or_lists(
         auto_link_urls_custom(
@@ -70,6 +71,7 @@ module Twitter
     # <tt>:suppress_lists</tt>::    disable auto-linking to lists
     # <tt>:suppress_no_follow</tt>::   Do not add <tt>rel="nofollow"</tt> to auto-linked items
     # <tt>:target</tt>::   add <tt>target="window_name"</tt> to auto-linked items
+    # <tt>:extra_html_attrs::   add custom <tt>name="value"</tt> attributes to auto-linked items. Hash key is the attribute name and the Hash value is attribute value</tt>
     def auto_link_usernames_or_lists(text, options = {}) # :yields: list_or_username
       options = options.dup
       options[:url_class] ||= DEFAULT_URL_CLASS
@@ -115,6 +117,7 @@ module Twitter
     # <tt>:hashtag_url_base</tt>::      the value for <tt>href</tt> attribute. The hashtag text (minus the <tt>#</tt>) will be appended at the end of this.
     # <tt>:suppress_no_follow</tt>::   Do not add <tt>rel="nofollow"</tt> to auto-linked items
     # <tt>:target</tt>::   add <tt>target="window_name"</tt> to auto-linked items
+    # <tt>:extra_html_attrs::   add custom <tt>name="value"</tt> attributes to auto-linked items. Hash key is the attribute name and the Hash value is attribute value</tt>
     def auto_link_hashtags(text, options = {})  # :yields: hashtag_text
       options = options.dup
       options[:url_class] ||= DEFAULT_URL_CLASS
@@ -142,6 +145,8 @@ module Twitter
     # elements in the <tt>href_options</tt> hash will be converted to HTML attributes
     # and place in the <tt><a></tt> tag. Unless <tt>href_options</tt> contains <tt>:suppress_no_follow</tt>
     # the <tt>rel="nofollow"</tt> attribute will be added.
+    #
+    # <tt>:extra_html_attrs::   add custom <tt>name="value"</tt> attributes to auto-linked items. Hash key is the attribute name and the Hash value is attribute value</tt>
     def auto_link_urls_custom(text, href_options = {})
       options = href_options.dup
       
