@@ -81,10 +81,7 @@ module Twitter
       options[:list_url_base] ||= "http://twitter.com/"
       options[:target] ||= DEFAULT_TARGET
 
-      extra_html_attrs = (options[:extra_html_attrs] || {}).dup
-      extra_html_attrs.merge!({ :target => options[:target] }) if options[:target]
-      extra_html_attrs.merge!(HTML_ATTR_NO_FOLLOW) unless options[:suppress_no_follow]
-      extra_html = html_attrs_for_options(extra_html_attrs)
+      extra_html = build_extra_html(options)
 
       Twitter::Rewriter.rewrite_usernames_or_lists(text) do |at, username, slash_listname|
         name = "#{username}#{slash_listname}"
@@ -125,10 +122,7 @@ module Twitter
       options[:hashtag_url_base] ||= "http://twitter.com/search?q=%23"
       options[:target] ||= DEFAULT_TARGET
 
-      extra_html_attrs = (options[:extra_html_attrs] || {}).dup
-      extra_html_attrs.merge!({ :target => options[:target] }) if options[:target]
-      extra_html_attrs.merge!(HTML_ATTR_NO_FOLLOW) unless options[:suppress_no_follow]
-      extra_html = html_attrs_for_options(extra_html_attrs)
+      extra_html = build_extra_html(options)
 
       Twitter::Rewriter.rewrite_hashtags(text) do |hash, hashtag|
         hashtag = yield(hashtag) if block_given?
@@ -159,12 +153,9 @@ module Twitter
         options.delete(:url_entities)
       end
 
-      extra_html_attrs = (options[:extra_html_attrs] || {}).dup
-      extra_html_attrs.merge!(options)
-      extra_html_attrs.merge!({ :class => options.delete(:url_class) }) if options[:url_class]
-      extra_html_attrs.merge!({ :target => options[:target] }) if options[:target]
-      extra_html_attrs.merge!(HTML_ATTR_NO_FOLLOW) unless options[:suppress_no_follow]
-      extra_html = html_attrs_for_options(extra_html_attrs)
+      extra_html = build_extra_html(options, true) do |extra_html_attrs|
+        extra_html_attrs.merge!({ :class => options.delete(:url_class) }) if options[:url_class]
+      end
 
       Twitter::Rewriter.rewrite_urls(text) do |url|
         href = if options[:link_url_block]
@@ -186,6 +177,26 @@ module Twitter
 
     BOOLEAN_ATTRIBUTES = Set.new([:disabled, :readonly, :multiple, :checked]).freeze
 
+    def build_extra_html(options, include_options = false) # yields all html attrs before converting to html
+      # copy hash in case same one is used for multiple method calls
+      extra_html_attrs = (options[:extra_html_attrs] || {}).dup
+
+      # copy all options values into attr hash
+      # backwards compatabilty for previous auto_link_urls_custom behavior
+      extra_html_attrs.merge!(options) if include_options
+
+      # target="window_name"
+      extra_html_attrs.merge!({ :target => options[:target] }) if options[:target]
+
+      # rel="nofollow"
+      extra_html_attrs.merge!(HTML_ATTR_NO_FOLLOW) unless options[:suppress_no_follow]
+
+      # let caller change the attrs before we build html
+      yield(extra_html_attrs) if block_given?
+
+      html_attrs_for_options(extra_html_attrs)
+    end
+
     def html_attrs_for_options(options)
       html_attrs options.reject{|k, v| OPTIONS_NOT_ATTRIBUTES.include?(k)}
     end
@@ -201,5 +212,6 @@ module Twitter
         attrs
       end
     end
+
   end
 end
