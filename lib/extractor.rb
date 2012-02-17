@@ -46,6 +46,37 @@ module Twitter
   # of usernames, lists, URLs and hashtags.
   module Extractor extend self
 
+    # Extracts all usernames, lists, hashtags and URLs  in the Tweet <tt>text</tt>
+    # along with the indices for where the entity ocurred
+    # If the <tt>text</tt> is <tt>nil</tt> or contains no entity an empty array
+    # will be returned.
+    #
+    # If a block is given then it will be called for each entity.
+    def extract_entities_with_indices(text, options = {})
+      # extract all entities
+      entities = extract_urls_with_indices(text, options) +
+                 extract_hashtags_with_indices(text) +
+                 extract_mentions_or_lists_with_indices(text)
+
+      return [] if entities.empty?
+
+      # sort by start index
+      entities.sort! {|a,b| a[:indices].first <=> b[:indices].first}
+
+      # remove duplicates
+      prev = nil
+      entities.each do |entity|
+        if prev != nil && prev[:indices].last > entity[:indices].first
+          entities.delete entity
+        else
+          prev = entity
+        end
+      end
+
+      entities.each{|entity| yield entity} if block_given?
+      entities
+    end
+
     # Extracts a list of all usernames mentioned in the Tweet <tt>text</tt>. If the
     # <tt>text</tt> is <tt>nil</tt> or contains no username mentions an empty array
     # will be returned.
@@ -68,18 +99,14 @@ module Twitter
       return [] unless text
 
       possible_screen_names = []
-      text.to_s.scan(Twitter::Regex[:extract_mentions]) do |before, sn|
-        extract_mentions_match_data = $~
-        after = $'
-        unless after =~ Twitter::Regex[:end_screen_name_match]
-          start_position = extract_mentions_match_data.char_begin(2) - 1
-          end_position = extract_mentions_match_data.char_end(2)
-          possible_screen_names << {
-            :screen_name => sn,
-            :indices => [start_position, end_position]
-          }
-        end
+      extract_mentions_or_lists_with_indices(text) do |screen_name, list_slug, start_position, end_position|
+        next unless list_slug.empty?
+        possible_screen_names << {
+          :screen_name => screen_name,
+          :indices => [start_position, end_position]
+        }
       end
+
       if block_given?
         possible_screen_names.each do |mention|
           yield mention[:screen_name], mention[:indices].first, mention[:indices].last
@@ -97,17 +124,17 @@ module Twitter
     # index, and the end index in the <tt>text</tt>. The list_slug will be an empty stirng
     # if this is a username mention.
     def extract_mentions_or_lists_with_indices(text) # :yields: username, list_slug, start, end
-      return [] unless text
+      return [] unless text && text.index(/[@＠]/)
 
       possible_entries = []
-      text.to_s.scan(Twitter::Regex[:extract_mentions_or_lists]) do |before, sn, list_slug|
-        extract_mentions_match_data = $~
+      text.to_s.scan(Twitter::Regex[:valid_mention_or_list]) do |before, at, screen_name, list_slug|
+        match_data = $~
         after = $'
-        unless after =~ Twitter::Regex[:end_screen_name_match]
-          start_position = extract_mentions_match_data.char_begin(2) - 1
-          end_position = extract_mentions_match_data.char_end(list_slug.nil? ? 2 : 3)
+        unless after =~ Twitter::Regex[:end_mention_match]
+          start_position = match_data.char_begin(3) - 1
+          end_position = match_data.char_end(list_slug.nil? ? 3 : 4)
           possible_entries << {
-            :screen_name => sn,
+            :screen_name => screen_name,
             :list_slug => list_slug || "",
             :indices => [start_position, end_position]
           }
@@ -130,9 +157,9 @@ module Twitter
     def extract_reply_screen_name(text) # :yields: username
       return nil unless text
 
-      possible_screen_name = text.match(Twitter::Regex[:extract_reply])
+      possible_screen_name = text.match(Twitter::Regex[:valid_reply])
       return unless possible_screen_name.respond_to?(:captures)
-      return if $' =~ Twitter::Regex[:end_screen_name_match]
+      return if $' =~ Twitter::Regex[:end_mention_match]
       screen_name = possible_screen_name.captures.first
       yield screen_name if block_given?
       screen_name
@@ -154,10 +181,11 @@ module Twitter
     # URLs an empty array will be returned.
     #
     # If a block is given then it will be called for each URL.
-    def extract_urls_with_indices(text) # :yields: url, start, end
-      return [] unless text
+    def extract_urls_with_indices(text, options = {:extract_url_without_protocol => true}) # :yields: url, start, end
+      return [] unless text && (options[:extract_url_without_protocol] ? text.index(".") : text.index(":"))
       urls = []
       position = 0
+
       text.to_s.scan(Twitter::Regex[:valid_url]) do |all, before, url, protocol, domain, port, path, query|
         valid_url_match_data = $~
 
@@ -167,6 +195,7 @@ module Twitter
         # If protocol is missing and domain contains non-ASCII characters,
         # extract ASCII-only domains.
         if !protocol
+          next if !options[:extract_url_without_protocol] || before =~ Twitter::Regex[:invalid_url_without_protocol_preceding_chars]
           last_url = nil
           last_url_invalid_match = nil
           domain.scan(Twitter::Regex[:valid_ascii_domain]) do |ascii_domain|
@@ -224,12 +253,13 @@ module Twitter
     #
     # If a block is given then it will be called for each hashtag.
     def extract_hashtags_with_indices(text) # :yields: hashtag_text, start, end
-      return [] unless text
+      return [] unless text && text.index(/[#＃]/)
 
       tags = []
-      text.scan(Twitter::Regex[:auto_link_hashtags]) do |before, hash, hash_text|
-        start_position = $~.char_begin(2)
-        end_position = $~.char_end(3)
+      text.scan(Twitter::Regex[:valid_hashtag]) do |before, hash, hash_text|
+        match_data = $~
+        start_position = match_data.char_begin(2)
+        end_position = match_data.char_end(3)
         after = $'
         unless after =~ Twitter::Regex[:end_hashtag_match]
           tags << {

@@ -424,10 +424,10 @@ describe Twitter::Autolink do
       end
 
       context "with a URL preceded in forbidden characters" do
-        it "should not be linked" do
+        it "should be linked" do
           matcher = TestAutolink.new
           %w| \ ' / ! = |.each do |char|
-            matcher.auto_link("#{char}#{url}").should_not have_autolinked_url(url)
+            matcher.auto_link("#{char}#{url}").should have_autolinked_url(url)
           end
         end
       end
@@ -541,6 +541,12 @@ describe Twitter::Autolink do
         auto_linked.should_not include('hashtag_classname')
       end
 
+      it "should autolink url/hashtag/mention in text with Unicode supplementary characters" do
+        auto_linked = @linker.auto_link("#{[0x10400].pack('U')} #hashtag #{[0x10400].pack('U')} @mention #{[0x10400].pack('U')} http://twitter.com/")
+        auto_linked.should have_autolinked_hashtag('#hashtag')
+        auto_linked.should link_to_screen_name('mention')
+        auto_linked.should have_autolinked_url('http://twitter.com/')
+      end
     end
 
   end
