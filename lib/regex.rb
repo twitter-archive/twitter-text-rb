@@ -119,15 +119,15 @@ module Twitter
       regex_range(0xfdf0, 0xfdfb),
       regex_range(0xfe70, 0xfe74), # Arabic Pres. Forms B
       regex_range(0xfe76, 0xfefc),
+      regex_range(0x200c, 0x200c), # Zero-Width Non-Joiner
       regex_range(0x0e01, 0x0e3a), # Thai
-      regex_range(0x0e40, 0x0e4e),
-      # Hangul (Korean)
+      regex_range(0x0e40, 0x0e4e), # Hangul (Korean)
       regex_range(0x1100, 0x11ff), # Hangul Jamo
       regex_range(0x3130, 0x3185), # Hangul Compatibility Jamo
       regex_range(0xA960, 0xA97F), # Hangul Jamo Extended-A
       regex_range(0xAC00, 0xD7AF), # Hangul Syllables
       regex_range(0xD7B0, 0xD7FF), # Hangul Jamo Extended-B
-      regex_range(0xFFA1, 0xFFDC) # Half-width Hangul
+      regex_range(0xFFA1, 0xFFDC)  # Half-width Hangul
     ].join('').freeze
     REGEXEN[:latin_accents] = /[#{LATIN_ACCENTS}]+/o
 
@@ -147,9 +147,10 @@ module Twitter
     # A hashtag must contain latin characters, numbers and underscores, but not all numbers.
     HASHTAG_ALPHA = /[a-z_#{LATIN_ACCENTS}#{NON_LATIN_HASHTAG_CHARS}#{CJ_HASHTAG_CHARACTERS}]/io
     HASHTAG_ALPHANUMERIC = /[a-z0-9_#{LATIN_ACCENTS}#{NON_LATIN_HASHTAG_CHARS}#{CJ_HASHTAG_CHARACTERS}]/io
+    NON_BREAK_SPACE_IN_HASHTAG = /(?:#{regex_range(0x00A0)}#{HASHTAG_ALPHANUMERIC})/
     HASHTAG_BOUNDARY = /\A|\z|[^&\/a-z0-9_#{LATIN_ACCENTS}#{NON_LATIN_HASHTAG_CHARS}#{CJ_HASHTAG_CHARACTERS}]/o
 
-    HASHTAG = /(#{HASHTAG_BOUNDARY})(#|＃)(#{HASHTAG_ALPHANUMERIC}*#{HASHTAG_ALPHA}#{HASHTAG_ALPHANUMERIC}*)/io
+    HASHTAG = /(#{HASHTAG_BOUNDARY})(#|＃)(#{HASHTAG_ALPHANUMERIC}*#{HASHTAG_ALPHA}(?:#{HASHTAG_ALPHANUMERIC}|#{NON_BREAK_SPACE_IN_HASHTAG})*)/io
 
     REGEXEN[:auto_link_hashtags] = /#{HASHTAG}/io
     # Used in Extractor and Rewriter for final filtering
