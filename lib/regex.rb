@@ -147,9 +147,10 @@ module Twitter
     # A hashtag must contain latin characters, numbers and underscores, but not all numbers.
     HASHTAG_ALPHA = /[a-z_#{LATIN_ACCENTS}#{NON_LATIN_HASHTAG_CHARS}#{CJ_HASHTAG_CHARACTERS}]/io
     HASHTAG_ALPHANUMERIC = /[a-z0-9_#{LATIN_ACCENTS}#{NON_LATIN_HASHTAG_CHARS}#{CJ_HASHTAG_CHARACTERS}]/io
+    NON_BREAK_SPACE_IN_HASHTAG = /(?:#{regex_range(0x00A0)}#{HASHTAG_ALPHANUMERIC})/
     HASHTAG_BOUNDARY = /\A|\z|[^&\/a-z0-9_#{LATIN_ACCENTS}#{NON_LATIN_HASHTAG_CHARS}#{CJ_HASHTAG_CHARACTERS}]/o
 
-    HASHTAG = /(#{HASHTAG_BOUNDARY})(#|＃)(#{HASHTAG_ALPHANUMERIC}*#{HASHTAG_ALPHA}#{HASHTAG_ALPHANUMERIC}*)/io
+    HASHTAG = /(#{HASHTAG_BOUNDARY})(#|＃)(#{HASHTAG_ALPHANUMERIC}*#{HASHTAG_ALPHA}(?:#{HASHTAG_ALPHANUMERIC}|#{NON_BREAK_SPACE_IN_HASHTAG})*)/io
 
     REGEXEN[:auto_link_hashtags] = /#{HASHTAG}/io
     # Used in Extractor and Rewriter for final filtering
