@@ -16,7 +16,7 @@ module Twitter
           new_text << ((index % 2 == 0) ? ">" : "<")
         end
 
-        if index % 2 != 0 || chunk.strip == ""
+        if index % 2 != 0 || chunk.end_with?("/")
           new_text << chunk
         else
           new_text << chunk.gsub(Twitter::Regex[:auto_link_usernames_or_lists]) do
