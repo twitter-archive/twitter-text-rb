@@ -86,13 +86,47 @@ module Twitter
       regex_range(0x0500, 0x0527), # Cyrillic Supplement
       regex_range(0x2de0, 0x2dff), # Cyrillic Extended A
       regex_range(0xa640, 0xa69f), # Cyrillic Extended B
-      # Hangul (Korean)
+      regex_range(0x0591, 0x05bf), # Hebrew
+      regex_range(0x05c1, 0x05c2),
+      regex_range(0x05c4, 0x05c5),
+      regex_range(0x05c7),
+      regex_range(0x05d0, 0x05ea),
+      regex_range(0x05f0, 0x05f4),
+      regex_range(0xfb12, 0xfb28), # Hebrew Presentation Forms
+      regex_range(0xfb2a, 0xfb36),
+      regex_range(0xfb38, 0xfb3c),
+      regex_range(0xfb3e),
+      regex_range(0xfb40, 0xfb41),
+      regex_range(0xfb43, 0xfb44),
+      regex_range(0xfb46, 0xfb4f),
+      regex_range(0x0610, 0x061a), # Arabic
+      regex_range(0x0620, 0x065f),
+      regex_range(0x066e, 0x06d3),
+      regex_range(0x06d5, 0x06dc),
+      regex_range(0x06de, 0x06e8),
+      regex_range(0x06ea, 0x06ef),
+      regex_range(0x06fa, 0x06fc),
+      regex_range(0x06ff),
+      regex_range(0x0750, 0x077f), # Arabic Supplement
+      regex_range(0x08a0),         # Arabic Extended A
+      regex_range(0x08a2, 0x08ac),
+      regex_range(0x08e4, 0x08fe),
+      regex_range(0xfb50, 0xfbb1), # Arabic Pres. Forms A
+      regex_range(0xfbd3, 0xfd3d),
+      regex_range(0xfd50, 0xfd8f),
+      regex_range(0xfd92, 0xfdc7),
+      regex_range(0xfdf0, 0xfdfb),
+      regex_range(0xfe70, 0xfe74), # Arabic Pres. Forms B
+      regex_range(0xfe76, 0xfefc),
+      regex_range(0x200c, 0x200c), # Zero-Width Non-Joiner
+      regex_range(0x0e01, 0x0e3a), # Thai
+      regex_range(0x0e40, 0x0e4e), # Hangul (Korean)
       regex_range(0x1100, 0x11ff), # Hangul Jamo
       regex_range(0x3130, 0x3185), # Hangul Compatibility Jamo
       regex_range(0xA960, 0xA97F), # Hangul Jamo Extended-A
       regex_range(0xAC00, 0xD7AF), # Hangul Syllables
       regex_range(0xD7B0, 0xD7FF), # Hangul Jamo Extended-B
-      regex_range(0xFFA1, 0xFFDC) # Half-width Hangul
+      regex_range(0xFFA1, 0xFFDC)  # Half-width Hangul
     ].join('').freeze
     REGEXEN[:latin_accents] = /[#{LATIN_ACCENTS}]+/o
 
@@ -106,8 +140,12 @@ module Twitter
       regex_range(0x20000, 0x2A6DF), # Kanji (CJK Extension B)
       regex_range(0x2A700, 0x2B73F), # Kanji (CJK Extension C)
       regex_range(0x2B740, 0x2B81F), # Kanji (CJK Extension D)
-      regex_range(0x2F800, 0x2FA1F), regex_range(0x3005), regex_range(0x303B) # Kanji (CJK supplement)
+      regex_range(0x2F800, 0x2FA1F), regex_range(0x3003), regex_range(0x3005), regex_range(0x303B) # Kanji (CJK supplement)
     ].join('').freeze
+
+    PUNCTUATION_CHARS = '!"#$%&\'()*+,-./:;<=>?@\[\]^_\`{|}~'
+    SPACE_CHARS = " \t\n\x0B\f\r"
+    CTRL_CHARS = "\x00-\x1F\x7F"
 
     # A hashtag must contain latin characters, numbers and underscores, but not all numbers.
     HASHTAG_ALPHA = /[a-z_#{LATIN_ACCENTS}#{NON_LATIN_HASHTAG_CHARS}#{CJ_HASHTAG_CHARACTERS}]/io
@@ -135,11 +173,11 @@ module Twitter
     # URL related hash regex collection
     REGEXEN[:valid_url_preceding_chars] = /(?:[^A-Z0-9@＠$#＃#{INVALID_CHARACTERS.join('')}]|^)/io
     REGEXEN[:invalid_url_without_protocol_preceding_chars] = /[-_.\/]$/
-    DOMAIN_VALID_CHARS = "[^[:punct:][:space:][:blank:][:cntrl:]#{INVALID_CHARACTERS.join('')}#{UNICODE_SPACES.join('')}]"
+    DOMAIN_VALID_CHARS = "[^#{PUNCTUATION_CHARS}#{SPACE_CHARS}#{CTRL_CHARS}#{INVALID_CHARACTERS.join('')}#{UNICODE_SPACES.join('')}]"
     REGEXEN[:valid_subdomain] = /(?:(?:#{DOMAIN_VALID_CHARS}(?:[_-]|#{DOMAIN_VALID_CHARS})*)?#{DOMAIN_VALID_CHARS}\.)/io
     REGEXEN[:valid_domain_name] = /(?:(?:#{DOMAIN_VALID_CHARS}(?:[-]|#{DOMAIN_VALID_CHARS})*)?#{DOMAIN_VALID_CHARS}\.)/io
 
-    REGEXEN[:valid_gTLD] = /(?:(?:aero|asia|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|org|pro|tel|travel|xxx)(?=[^a-z]|$))/i
+    REGEXEN[:valid_gTLD] = /(?:(?:aero|asia|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|org|pro|tel|travel|xxx)(?=[^0-9a-z]|$))/i
     REGEXEN[:valid_ccTLD] = %r{
       (?:
         (?:ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|
@@ -148,7 +186,7 @@ module Twitter
         lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|
         pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sk|sl|sm|sn|so|sr|ss|st|su|sv|sy|sz|tc|td|tf|tg|th|
         tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|za|zm|zw)
-        (?=[^a-z]|$)
+        (?=[^0-9a-z]|$)
       )
     }ix
     REGEXEN[:valid_punycode] = /(?:xn--[0-9a-z]+)/
