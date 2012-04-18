@@ -11,10 +11,10 @@ end
 require 'active_support'
 require 'active_support/core_ext/string/multibyte.rb'
 
-require File.join(File.dirname(__FILE__), 'regex')
-require File.join(File.dirname(__FILE__), 'rewriter')
-require File.join(File.dirname(__FILE__), 'autolink')
-require File.join(File.dirname(__FILE__), 'extractor')
-require File.join(File.dirname(__FILE__), 'unicode')
-require File.join(File.dirname(__FILE__), 'validation')
-require File.join(File.dirname(__FILE__), 'hithighlighter')
+require File.join(File.dirname(__FILE__), 'twitter-text', 'regex')
+require File.join(File.dirname(__FILE__), 'twitter-text', 'rewriter')
+require File.join(File.dirname(__FILE__), 'twitter-text', 'autolink')
+require File.join(File.dirname(__FILE__), 'twitter-text', 'extractor')
+require File.join(File.dirname(__FILE__), 'twitter-text', 'unicode')
+require File.join(File.dirname(__FILE__), 'twitter-text', 'validation')
+require File.join(File.dirname(__FILE__), 'twitter-text', 'hithighlighter')
