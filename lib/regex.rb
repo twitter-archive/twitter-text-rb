@@ -175,8 +175,9 @@ module Twitter
     REGEXEN[:valid_url_preceding_chars] = /(?:[^A-Z0-9@＠$#＃#{INVALID_CHARACTERS.join('')}]|^)/io
     REGEXEN[:invalid_url_without_protocol_preceding_chars] = /[-_.\/]$/
     DOMAIN_VALID_CHARS = "[^#{PUNCTUATION_CHARS}#{SPACE_CHARS}#{CTRL_CHARS}#{INVALID_CHARACTERS.join('')}#{UNICODE_SPACES.join('')}]"
-    REGEXEN[:valid_subdomain] = /(?:(?:#{DOMAIN_VALID_CHARS}(?:[_-]|#{DOMAIN_VALID_CHARS})*)?#{DOMAIN_VALID_CHARS}\.)/io
-    REGEXEN[:valid_domain_name] = /(?:(?:#{DOMAIN_VALID_CHARS}(?:[-]|#{DOMAIN_VALID_CHARS})*)?#{DOMAIN_VALID_CHARS}\.)/io
+    REGEXEN[:valid_punycode] = /(?:xn--[0-9a-z]+)/i
+    REGEXEN[:valid_subdomain] = /(?:(?:(?:#{DOMAIN_VALID_CHARS}(?:[_-]|#{DOMAIN_VALID_CHARS})*)?#{DOMAIN_VALID_CHARS}\.)|#{REGEXEN[:valid_punycode]})/io
+    REGEXEN[:valid_domain_name] = /(?:(?:(?:#{DOMAIN_VALID_CHARS}(?:[-]|#{DOMAIN_VALID_CHARS})*)?#{DOMAIN_VALID_CHARS}\.)|#{REGEXEN[:valid_punycode]})/io
 
     REGEXEN[:valid_gTLD] = /(?:(?:aero|asia|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|org|pro|tel|travel|xxx)(?=[^0-9a-z]|$))/i
     REGEXEN[:valid_ccTLD] = %r{
@@ -190,11 +191,10 @@ module Twitter
         (?=[^0-9a-z]|$)
       )
     }ix
-    REGEXEN[:valid_punycode] = /(?:xn--[0-9a-z]+)/
 
     REGEXEN[:valid_domain] = /(?:
       #{REGEXEN[:valid_subdomain]}*#{REGEXEN[:valid_domain_name]}
-      (?:#{REGEXEN[:valid_gTLD]}|#{REGEXEN[:valid_ccTLD]}|#{REGEXEN[:valid_punycode]})
+      (?:#{REGEXEN[:valid_gTLD]}|#{REGEXEN[:valid_ccTLD]})
     )/iox
 
     # This is used in Extractor
