@@ -12,6 +12,7 @@ require 'active_support'
 require 'active_support/core_ext/string/multibyte.rb'
 
 %w(
+  version
   deprecation
   regex
   rewriter
