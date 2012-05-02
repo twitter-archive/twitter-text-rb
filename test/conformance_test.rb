@@ -8,7 +8,7 @@ if major.to_i == 1 && minor.to_i < 9
   $KCODE='u'
 end
 
-require File.expand_path('../../lib/twitter-text', __FILE__)
+require File.expand_path('../../lib/twitter_text', __FILE__)
 
 class ConformanceTest < Test::Unit::TestCase
   include TwitterText::Extractor
