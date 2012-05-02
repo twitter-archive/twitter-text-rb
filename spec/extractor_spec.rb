@@ -2,10 +2,10 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
 class TestExtractor
-  include Twitter::Extractor
+  include TwitterText::Extractor
 end
 
-describe Twitter::Extractor do
+describe TwitterText::Extractor do
   before do
     @extractor = TestExtractor.new
   end
@@ -289,11 +289,11 @@ describe Twitter::Extractor do
         end
 
         it "should not allow the multiplication character" do
-          @extractor.extract_hashtags("#pre#{Twitter::Unicode::U00D7}post").should == ["pre"]
+          @extractor.extract_hashtags("#pre#{TwitterText::Unicode::U00D7}post").should == ["pre"]
         end
 
         it "should not allow the division character" do
-          @extractor.extract_hashtags("#pre#{Twitter::Unicode::U00F7}post").should == ["pre"]
+          @extractor.extract_hashtags("#pre#{TwitterText::Unicode::U00F7}post").should == ["pre"]
         end
       end
 

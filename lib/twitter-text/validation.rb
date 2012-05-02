@@ -1,4 +1,4 @@
-module Twitter
+module TwitterText
   module Validation extend self
     MAX_LENGTH = 140
 
@@ -31,7 +31,7 @@ module Twitter
       return :empty if !text || text.empty?
       begin
         return :too_long if tweet_length(text) > MAX_LENGTH
-        return :invalid_characters if Twitter::Regex::INVALID_CHARACTERS.any?{|invalid_char| text.include?(invalid_char) }
+        return :invalid_characters if TwitterText::Regex::INVALID_CHARACTERS.any?{|invalid_char| text.include?(invalid_char) }
       rescue ArgumentError, ActiveSupport::Multibyte::EncodingError => e
         # non-Unicode value.
         return :invalid_characters
@@ -47,12 +47,12 @@ module Twitter
     def valid_username?(username)
       return false if !username || username.empty?
 
-      extracted = Twitter::Extractor.extract_mentioned_screen_names(username)
+      extracted = TwitterText::Extractor.extract_mentioned_screen_names(username)
       # Should extract the username minus the @ sign, hence the [1..-1]
       extracted.size == 1 && extracted.first == username[1..-1]
     end
 
-    VALID_LIST_RE = /\A#{Twitter::Regex[:valid_mention_or_list]}\z/o
+    VALID_LIST_RE = /\A#{TwitterText::Regex[:valid_mention_or_list]}\z/o
     def valid_list?(username_list)
       match = username_list.match(VALID_LIST_RE)
       # Must have matched and had nothing before or after
@@ -62,7 +62,7 @@ module Twitter
     def valid_hashtag?(hashtag)
       return false if !hashtag || hashtag.empty?
 
-      extracted = Twitter::Extractor.extract_hashtags(hashtag)
+      extracted = TwitterText::Extractor.extract_hashtags(hashtag)
       # Should extract the hashtag minus the # sign, hence the [1..-1]
       extracted.size == 1 && extracted.first == hashtag[1..-1]
     end
@@ -70,19 +70,19 @@ module Twitter
     def valid_url?(url, unicode_domains=true, require_protocol=true)
       return false if !url || url.empty?
 
-      url_parts = url.match(Twitter::Regex[:validate_url_unencoded])
+      url_parts = url.match(TwitterText::Regex[:validate_url_unencoded])
       return false unless (url_parts && url_parts.to_s == url)
 
       scheme, authority, path, query, fragment = url_parts.captures
 
       return false unless ((!require_protocol ||
-                           (valid_match?(scheme, Twitter::Regex[:validate_url_scheme]) && scheme.match(/\Ahttps?\Z/i))) &&
-                           valid_match?(path, Twitter::Regex[:validate_url_path]) &&
-                           valid_match?(query, Twitter::Regex[:validate_url_query], true) &&
-                           valid_match?(fragment, Twitter::Regex[:validate_url_fragment], true))
+                           (valid_match?(scheme, TwitterText::Regex[:validate_url_scheme]) && scheme.match(/\Ahttps?\Z/i))) &&
+                           valid_match?(path, TwitterText::Regex[:validate_url_path]) &&
+                           valid_match?(query, TwitterText::Regex[:validate_url_query], true) &&
+                           valid_match?(fragment, TwitterText::Regex[:validate_url_fragment], true))
 
-      return (unicode_domains && valid_match?(authority, Twitter::Regex[:validate_url_unicode_authority])) ||
-             (!unicode_domains && valid_match?(authority, Twitter::Regex[:validate_url_authority]))
+      return (unicode_domains && valid_match?(authority, TwitterText::Regex[:validate_url_unicode_authority])) ||
+             (!unicode_domains && valid_match?(authority, TwitterText::Regex[:validate_url_authority]))
     end
 
     private

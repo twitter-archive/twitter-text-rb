@@ -2,18 +2,18 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
 class TestValidation
-  include Twitter::Validation
+  include TwitterText::Validation
 end
 
-describe Twitter::Validation do
+describe TwitterText::Validation do
 
   it "should disallow invalid BOM character" do
-    TestValidation.new.tweet_invalid?("Bom:#{Twitter::Unicode::UFFFE}").should == :invalid_characters
-    TestValidation.new.tweet_invalid?("Bom:#{Twitter::Unicode::UFEFF}").should == :invalid_characters
+    TestValidation.new.tweet_invalid?("Bom:#{TwitterText::Unicode::UFFFE}").should == :invalid_characters
+    TestValidation.new.tweet_invalid?("Bom:#{TwitterText::Unicode::UFEFF}").should == :invalid_characters
   end
 
   it "should disallow invalid U+FFFF character" do
-    TestValidation.new.tweet_invalid?("Bom:#{Twitter::Unicode::UFFFF}").should == :invalid_characters
+    TestValidation.new.tweet_invalid?("Bom:#{TwitterText::Unicode::UFFFF}").should == :invalid_characters
   end
 
   it "should disallow direction change characters" do

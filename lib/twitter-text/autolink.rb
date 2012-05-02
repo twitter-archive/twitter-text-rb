@@ -2,7 +2,7 @@
 
 require 'set'
 
-module Twitter
+module TwitterText
   # A module for including Tweet auto-linking in a class. The primary use of this is for helpers/views so they can auto-link
   # usernames, lists, hashtags and URLs.
   module Autolink extend self
@@ -46,7 +46,7 @@ module Twitter
       options[:html_attrs] = extract_html_attrs_from_options!(options)
       options[:html_attrs][:rel] ||= "nofollow" unless options[:suppress_no_follow]
 
-      Twitter::Rewriter.rewrite_entities(text, entities) do |entity, chars|
+      TwitterText::Rewriter.rewrite_entities(text, entities) do |entity, chars|
         if entity[:url]
           link_to_url(entity, chars, options, &block)
         elsif entity[:hashtag]

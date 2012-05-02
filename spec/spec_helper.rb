@@ -23,13 +23,13 @@ end
 
 RSpec::Matchers.define :match_autolink_expression do
   match do |string|
-    !Twitter::Extractor.extract_urls(string).empty?
+    !TwitterText::Extractor.extract_urls(string).empty?
   end
 end
 
 RSpec::Matchers.define :match_autolink_expression_in do |text|
   match do |url|
-    @match_data = Twitter::Regex[:valid_url].match(text)
+    @match_data = TwitterText::Regex[:valid_url].match(text)
     @match_data && @match_data.to_s.strip == url
   end
 

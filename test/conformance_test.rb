@@ -11,10 +11,10 @@ end
 require File.expand_path('../../lib/twitter-text', __FILE__)
 
 class ConformanceTest < Test::Unit::TestCase
-  include Twitter::Extractor
-  include Twitter::Autolink
-  include Twitter::HitHighlighter
-  include Twitter::Validation
+  include TwitterText::Extractor
+  include TwitterText::Autolink
+  include TwitterText::HitHighlighter
+  include TwitterText::Validation
 
   private
 

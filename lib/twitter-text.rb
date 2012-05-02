@@ -24,3 +24,8 @@ require 'active_support/core_ext/string/multibyte.rb'
 ).each do |name|
   require "twitter-text/#{name}"
 end
+
+# Backward Compatibility
+module Twitter
+  include TwitterText
+end

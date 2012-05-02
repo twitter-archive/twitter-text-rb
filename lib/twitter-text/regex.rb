@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-module Twitter
+module TwitterText
   # A collection of regular expressions for parsing Tweet text. The regular expression
   # list is frozen at load time to ensure immutability. These reular expressions are
   # used throughout the <tt>Twitter</tt> classes. Special care has been taken to make

@@ -1,4 +1,4 @@
-module Twitter
+module TwitterText
   # A module provides base methods to rewrite usernames, lists, hashtags and URLs.
   module Rewriter extend self
     def rewrite_entities(text, entities)

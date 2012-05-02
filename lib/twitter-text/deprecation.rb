@@ -1,4 +1,4 @@
-module Twitter
+module TwitterText
   module Deprecation
     def deprecate(method, new_method = nil)
       deprecated_method = :"deprecated_#{method}"

@@ -43,7 +43,7 @@ class MatchData
   end
 end
 
-module Twitter
+module TwitterText
   # A module for including Tweet parsing in a class. This module provides function for the extraction and processing
   # of usernames, lists, URLs and hashtags.
   module Extractor extend self
@@ -130,10 +130,10 @@ module Twitter
       return [] unless text =~ /[@＠]/
 
       possible_entries = []
-      text.to_s.scan(Twitter::Regex[:valid_mention_or_list]) do |before, at, screen_name, list_slug|
+      text.to_s.scan(TwitterText::Regex[:valid_mention_or_list]) do |before, at, screen_name, list_slug|
         match_data = $~
         after = $'
-        unless after =~ Twitter::Regex[:end_mention_match]
+        unless after =~ TwitterText::Regex[:end_mention_match]
           start_position = match_data.char_begin(3) - 1
           end_position = match_data.char_end(list_slug.nil? ? 3 : 4)
           possible_entries << {
@@ -160,9 +160,9 @@ module Twitter
     def extract_reply_screen_name(text) # :yields: username
       return nil unless text
 
-      possible_screen_name = text.match(Twitter::Regex[:valid_reply])
+      possible_screen_name = text.match(TwitterText::Regex[:valid_reply])
       return unless possible_screen_name.respond_to?(:captures)
-      return if $' =~ Twitter::Regex[:end_mention_match]
+      return if $' =~ TwitterText::Regex[:end_mention_match]
       screen_name = possible_screen_name.captures.first
       yield screen_name if block_given?
       screen_name
@@ -189,7 +189,7 @@ module Twitter
       urls = []
       position = 0
 
-      text.to_s.scan(Twitter::Regex[:valid_url]) do |all, before, url, protocol, domain, port, path, query|
+      text.to_s.scan(TwitterText::Regex[:valid_url]) do |all, before, url, protocol, domain, port, path, query|
         valid_url_match_data = $~
 
         start_position = valid_url_match_data.char_begin(3)
@@ -198,16 +198,16 @@ module Twitter
         # If protocol is missing and domain contains non-ASCII characters,
         # extract ASCII-only domains.
         if !protocol
-          next if !options[:extract_url_without_protocol] || before =~ Twitter::Regex[:invalid_url_without_protocol_preceding_chars]
+          next if !options[:extract_url_without_protocol] || before =~ TwitterText::Regex[:invalid_url_without_protocol_preceding_chars]
           last_url = nil
           last_url_invalid_match = nil
-          domain.scan(Twitter::Regex[:valid_ascii_domain]) do |ascii_domain|
+          domain.scan(TwitterText::Regex[:valid_ascii_domain]) do |ascii_domain|
             last_url = {
               :url => ascii_domain,
               :indices => [start_position + $~.char_begin(0),
                            start_position + $~.char_end(0)]
             }
-            last_url_invalid_match = ascii_domain =~ Twitter::Regex[:invalid_short_domain]
+            last_url_invalid_match = ascii_domain =~ TwitterText::Regex[:invalid_short_domain]
             urls << last_url unless last_url_invalid_match
           end
 
@@ -223,7 +223,7 @@ module Twitter
           end
         else
           # In the case of t.co URLs, don't allow additional path characters
-          if url =~ Twitter::Regex[:valid_tco_url]
+          if url =~ TwitterText::Regex[:valid_tco_url]
             url = $&
             end_position = start_position + url.char_length
           end
@@ -259,12 +259,12 @@ module Twitter
       return [] unless text =~ /[#＃]/
 
       tags = []
-      text.scan(Twitter::Regex[:valid_hashtag]) do |before, hash, hash_text|
+      text.scan(TwitterText::Regex[:valid_hashtag]) do |before, hash, hash_text|
         match_data = $~
         start_position = match_data.char_begin(2)
         end_position = match_data.char_end(3)
         after = $'
-        unless after =~ Twitter::Regex[:end_hashtag_match]
+        unless after =~ TwitterText::Regex[:end_hashtag_match]
           tags << {
             :hashtag => hash_text,
             :indices => [start_position, end_position]
