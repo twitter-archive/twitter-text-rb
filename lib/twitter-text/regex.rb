@@ -342,6 +342,8 @@ module Twitter
       )?\Z
     }ix
 
+    REGEXEN[:rtl_chars] = /[\u0600-\u06FF]|[\u0750-\u077F]|[\u0590-\u05FF]|[\uFE70-\uFEFF]/
+
     REGEXEN.each_pair{|k,v| v.freeze }
 
     # Return the regular expression for a given <tt>key</tt>. If the <tt>key</tt>
