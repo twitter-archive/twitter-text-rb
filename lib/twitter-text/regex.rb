@@ -82,6 +82,14 @@ module Twitter
           regex_range(0x1e00, 0x1eff)
     ].join('').freeze
 
+    RTL_CHARACTERS = [
+      regex_range(0x0600,0x06FF),
+      regex_range(0x0750,0x077F),
+      regex_range(0x0590,0x05FF),
+      regex_range(0xFE70,0xFEFF)
+    ].join('').freeze
+
+
     NON_LATIN_HASHTAG_CHARS = [
       # Cyrillic (Russian, Ukrainian, etc.)
       regex_range(0x0400, 0x04ff), # Cyrillic
@@ -342,7 +350,7 @@ module Twitter
       )?\Z
     }ix
 
-    REGEXEN[:rtl_chars] = /[\u0600-\u06FF]|[\u0750-\u077F]|[\u0590-\u05FF]|[\uFE70-\uFEFF]/
+    REGEXEN[:rtl_chars] = /[#{RTL_CHARACTERS}]/io
 
     REGEXEN.each_pair{|k,v| v.freeze }
 
