@@ -47,7 +47,8 @@ module Twitter
     INVALID_CHARACTERS = [
       0xFFFE, 0xFEFF, # BOM
       0xFFFF,         # Special
-      0x202A, 0x202B, 0x202C, 0x202D, 0x202E # Directional change
+      0x202A, 0x202B, 0x202C, 0x202D, 0x202E, # Directional change,
+      (0x2060..0x2064).to_a # Zero-width (invisible) characters
     ].map{|cp| [cp].pack('U') }.freeze
     REGEXEN[:invalid_control_characters] = /[#{INVALID_CHARACTERS.join('')}]/o
 
