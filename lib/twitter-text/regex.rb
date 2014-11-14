@@ -60,6 +60,13 @@ module Twitter
     ].map{|cp| [cp].pack('U') }.freeze
     REGEXEN[:invalid_control_characters] = /[#{INVALID_CHARACTERS.join('')}]/o
 
+    SPECIAL_CHARS_INCLUDED = [
+      0x00b7, # MIDDLE DOT
+      0x2022, # BULLET
+      0x30fb, # KATAKANA MIDDLE DOT
+      0xff65, # HALFWIDTH KATAKANA MIDDLE DOT
+    ].map{|c| [c].pack('U') }.freeze.join('')
+
     major, minor, _patch = RUBY_VERSION.split('.')
     if major.to_i >= 2 || major.to_i == 1 && minor.to_i >= 9 || (defined?(RUBY_ENGINE) && ["jruby", "rbx"].include?(RUBY_ENGINE))
       REGEXEN[:list_name] = /[a-zA-Z][a-zA-Z0-9_\-\u0080-\u00ff]{0,24}/
@@ -168,7 +175,7 @@ module Twitter
 
     # A hashtag must contain latin characters, numbers and underscores, but not all numbers.
     HASHTAG_ALPHA = /[a-z_#{LATIN_ACCENTS}#{NON_LATIN_HASHTAG_CHARS}#{CJ_HASHTAG_CHARACTERS}]/io
-    HASHTAG_ALPHANUMERIC = /[a-z0-9_#{LATIN_ACCENTS}#{NON_LATIN_HASHTAG_CHARS}#{CJ_HASHTAG_CHARACTERS}]/io
+    HASHTAG_ALPHANUMERIC = /[a-z0-9_#{LATIN_ACCENTS}#{NON_LATIN_HASHTAG_CHARS}#{CJ_HASHTAG_CHARACTERS}#{SPECIAL_CHARS_INCLUDED}]/io
     HASHTAG_BOUNDARY = /\A|\z|[^&a-z0-9_#{LATIN_ACCENTS}#{NON_LATIN_HASHTAG_CHARS}#{CJ_HASHTAG_CHARACTERS}]/o
 
     HASHTAG = /(#{HASHTAG_BOUNDARY})(#|＃)(#{HASHTAG_ALPHANUMERIC}*#{HASHTAG_ALPHA}#{HASHTAG_ALPHANUMERIC}*)/io
