@@ -225,7 +225,7 @@ module Twitter
 
     # This is used in Extractor
     REGEXEN[:valid_ascii_domain] = /
-      (?:(?:[A-Za-z0-9\-_]|#{REGEXEN[:latin_accents]})+\.)+
+      (?:[A-Za-z0-9_#{REGEXEN[:latin_accents]}][-A-Za-z0-9_#{REGEXEN[:latin_accents]}]*\.)+
       (?:#{REGEXEN[:valid_gTLD]}|#{REGEXEN[:valid_ccTLD]}|#{REGEXEN[:valid_punycode]})
     /iox
 
