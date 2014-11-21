@@ -12,8 +12,8 @@ If you are using bundler:
    gem 'twitter-text', '~> 1.10.0'
 
 Or just run:
-
-	 gem install twitter-text
+    
+   gem install twitter-text
 
 == Extraction Examples
 
