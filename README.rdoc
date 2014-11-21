@@ -4,6 +4,17 @@ A gem that provides text processing routines for Twitter Tweets. The major
 reason for this is to unify the various auto-linking and extraction of
 usernames, lists, hashtags and URLs.
 
+
+== Installation 
+
+If you are using bundler:
+
+   gem 'twitter-text', '~> 1.10.0'
+
+Or just run:
+
+	 gem install twitter-text
+
 == Extraction Examples
 
   # Extraction
