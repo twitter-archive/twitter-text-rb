@@ -326,7 +326,7 @@ module Twitter
     end
 
     def link_to_hashtag(entity, chars, options = {})
-      hash = chars[entity[:indices].first]
+      hash = chars[entity.indices.first]
       hashtag = entity[:hashtag]
       hashtag = yield(hashtag) if block_given?
       hashtag_class = options[:hashtag_class]
@@ -352,7 +352,7 @@ module Twitter
     end
 
     def link_to_cashtag(entity, chars, options = {})
-      dollar = chars[entity[:indices].first]
+      dollar = chars[entity.indices.first]
       cashtag = entity[:cashtag]
       cashtag = yield(cashtag) if block_given?
 
@@ -376,7 +376,7 @@ module Twitter
       chunk = name.dup
       chunk = yield(chunk) if block_given?
 
-      at = chars[entity[:indices].first]
+      at = chars[entity.indices.first]
 
       html_attrs = options[:html_attrs].dup
 

@@ -51,11 +51,11 @@ module Twitter
     # This returns a new array with no overlapping entities.
     def remove_overlapping_entities(entities)
       # sort by start index
-      entities = entities.sort_by{|entity| entity[:indices].first}
+      entities = entities.sort_by{|entity| entity.indices.first}
 
       # remove duplicates
       prev = nil
-      entities.reject!{|entity| (prev && prev[:indices].last > entity[:indices].first) || (prev = entity) && false}
+      entities.reject!{|entity| (prev && prev[:indices].last > entity.indices.first) || (prev = entity) && false}
       entities
     end
 
