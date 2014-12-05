@@ -62,3 +62,43 @@ end
 desc "Run cruise control build"
 task :cruise => [:spec, 'test:conformance'] do
 end
+
+namespace :tld do
+  task :update do
+    require 'open-uri'
+    require 'nokogiri'
+
+    file = File.join(File.dirname(__FILE__), 'lib', 'twitter-text', 'regex.rb')
+
+    # Get a list of TLDs.
+    tlds = []
+    document = Nokogiri::HTML(open('http://www.iana.org/domains/root/db'))
+    document.css('table#tld-table tr').each do |tr|
+      info = tr.css('td')
+      tlds << { :domain => info[0].text.gsub('.', ''), :type => info[1].text } unless info.empty?
+    end
+
+    # Update ccTLD regex.
+    cctlds = tlds.select { |tld| tld[:type] =~ /country-code/ }.map { |tld| tld[:domain] }.sort
+    replacement = "      (?:\n        (?:\n          "
+    replacement << cctlds.join('|').scan(/.{1,109}(?:\||\z)/).join("\n          ")
+    replacement << "\n        )\n      (?=[^0-9a-z@]|$))"
+
+    text = File.read(file)
+    text.gsub!(/(REGEXEN\[:valid_ccTLD\] = %r\{\n)(.*?)(\s+\}ix)/m, "\\1#{replacement}\\3")
+    File.open(file, 'w') { |f| f.puts text }
+
+    # Update gTLD regex.
+    gtlds = tlds.select { |tld| tld[:type] =~ /generic|sponsored|infrastructure|generic-restricted/ }.map { |tld| tld[:domain] }.sort
+    replacement = "      (?:\n        (?:\n          "
+    replacement << gtlds.join('|').scan(/.{1,109}(?:\||\z)/).join("\n          ")
+    replacement << "\n        )\n      (?=[^0-9a-z@]|$))"
+
+    text = File.read(file)
+    text.gsub!(/(REGEXEN\[:valid_gTLD\] = %r\{\n)(.*?)(\s+\}ix)/m, "\\1#{replacement}\\3")
+    File.open(file, 'w') { |f| f.puts text }
+
+    # Commit changes.
+    system("cd #{File.dirname(__FILE__)} && git add #{file} && git commit -m \"Update gTLD and ccTLD lists.\"")
+  end
+end
