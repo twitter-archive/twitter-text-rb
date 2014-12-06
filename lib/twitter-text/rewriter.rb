@@ -5,13 +5,13 @@ module Twitter
       chars = text.to_s.to_char_a
 
       # sort by start index
-      entities = entities.sort_by{|entity| entity[:indices].first}
+      entities = entities.sort_by{|entity| entity.indices.first}
 
       result = []
       last_index = entities.inject(0) do |index, entity|
-        result << chars[index...entity[:indices].first]
+        result << chars[index...entity.indices.first]
         result << yield(entity, chars)
-        entity[:indices].last
+        entity.indices.last
       end
       result << chars[last_index..-1]
 
@@ -31,7 +31,7 @@ module Twitter
     def rewrite_usernames_or_lists(text)
       entities = Extractor.extract_mentions_or_lists_with_indices(text)
       rewrite_entities(text, entities) do |entity, chars|
-        at = chars[entity[:indices].first]
+        at = chars[entity.indices.first]
         list_slug = entity[:list_slug]
         list_slug = nil if list_slug.empty?
         yield(at, entity[:screen_name], list_slug)
@@ -42,7 +42,7 @@ module Twitter
     def rewrite_hashtags(text)
       entities = Extractor.extract_hashtags_with_indices(text)
       rewrite_entities(text, entities) do |entity, chars|
-        hash = chars[entity[:indices].first]
+        hash = chars[entity.indices.first]
         yield(hash, entity[:hashtag])
       end
     end
